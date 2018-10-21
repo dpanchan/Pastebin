@@ -1,40 +1,28 @@
 from flask import Flask
-from flask import render_template, redirect
-import random as r
-import string
-import os
+from flask import render_template, redirect, request
+from utils import *
 
 app = Flask(__name__)
 
-uploads_dir = os.path.join(os.getcwd(), "uploads")
-length_of_id = 7
-id_chars = string.digits + string.ascii_letters
-
-@app.route("/<paste_id>", methods=['GET'])
+@app.route("/paste/<paste_id>", methods=['GET'])
 def get_paste(paste_id):
-    return generate_paste_id()
+  body = read_paste(paste_id)
+  if not body:
+    abort(404)
+  return render_template("200.html", paste=body)
 
-@app.route("/upload", methods=['POST'])
+@app.route("/", methods=['POST', 'GET'])
 def post_paste():
-    paste_id = store(request.body)
+  method = request.method
+  if method == "GET":
+    return render_template("home.html")
+  elif method == "POST":
+    paste_id = store(request.form['paste'])
     return redirect("/paste/{}".format(paste_id))
 
-def store(paste):
-    paste_id = generate_paste_id()
-    store_path = os.path.join(uploads_dir, paste_id)
-    with open(store_path, "w") as f:
-        f.write(paste)
-
-def generate_paste_id():
-    paste_id = None
-    while True:
-        paste_id = "".join(r.choices(id_chars, k=length_of_id))    
-        if not os.path.isfile(uploads_dir, paste_id):
-            break
-    return paste_id
-
-app.run(
+if __name__ == "__main__":
+  check_uploads_folder()
+  app.run(
     debug=True,
     host='0.0.0.0',
-    port=10000
-)
+    port=8080)
