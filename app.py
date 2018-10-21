@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 
 uploads_dir = os.path.join(os.getcwd(), "uploads")
-length_of_id = 8
+length_of_id = 7
 id_chars = string.digits + string.ascii_letters
 
 @app.route("/<paste_id>", methods=['GET'])
